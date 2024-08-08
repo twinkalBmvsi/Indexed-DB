@@ -34,43 +34,8 @@ const menuButtons = [
 const Mainmenu = () => {
   const navigate = useNavigate();
 
-  //   Adding the route to the IndexedDB
-  const handleAddRoute = async (UUID, routeName) => {
-    console.log("Line 40 IndexedDB func", UUID);
-
-    const newRoute = {
-      id: UUID,
-      name: routeName,
-      isActive: true,
-      master: true,
-    };
-
-    const route = await getRoute(UUID);
-    if (route) {
-      await updateRoute(newRoute);
-    } else {
-      await addRoute(newRoute);
-    }
-
-    console.log("Navigating to", routeName);
-    navigate(routeName);
-  };
-
   const handleNavigate = (route) => {
-    let tabId = "";
-    const sessionTabId = sessionStorage.getItem("tabId");
-
-    if (sessionTabId) {
-      tabId = sessionTabId;
-      handleAddRoute(sessionTabId, route);
-    } else {
-      let UUID = self.crypto.randomUUID();
-      tabId = UUID;
-
-      //   Storing the route to indexedDB.
-      handleAddRoute(UUID, route);
-      sessionStorage.setItem("tabId", UUID);
-    }
+    navigate(route);
   };
 
   return (

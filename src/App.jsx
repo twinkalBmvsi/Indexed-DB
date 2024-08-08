@@ -6,13 +6,25 @@ import Ask from "./routes/Ask";
 import Test from "./routes/Test";
 import Treat from "./routes/Treat";
 import Consult from "./routes/Consult";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { getAllRoutes } from "./utils/indexedDB";
 
 function App() {
+  const location = useLocation();
+
   const handleGetRoute = async () => {
+    let UUID = self.crypto.randomUUID();
+
+    const newRoute = {
+      id: UUID,
+      name: location.pathname,
+      isActive: true,
+      master: true,
+    };
+
     const routesList = await getAllRoutes();
-    console.log("routes list", routesList);
+
+    console.log("routes list", routesList, newRoute);
   };
 
   useEffect(() => {
