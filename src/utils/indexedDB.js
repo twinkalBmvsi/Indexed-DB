@@ -86,3 +86,11 @@ export const deleteRoute = async (id) => {
   const db = await dbPromise;
   return db.delete("routes", id);
 };
+
+export const partialUpdateRoute = async (id, newData) => {
+  const db = await dbPromise;
+  const tx = db.transaction("routes", "readwrite");
+  const store = tx.objectStore("routes");
+  await store.put({ ...newData, id });
+  await tx.done;
+};

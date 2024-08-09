@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { useNavigate } from "react-router-dom";
-import { addRoute, getRoute, updateRoute } from "../utils/indexedDB";
 
 const menuButtons = [
   {
