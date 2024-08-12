@@ -27,8 +27,22 @@ function App() {
   };
 
   const handleGetRoute = async () => {
-    let UUID = self.crypto.randomUUID();
-    const newRoute = {
+    let UUID = "";
+
+    // Get the list of all routes
+    const routesList = await getAllRoutes();
+    // Checking that if there is any route in the DB which isActive is false
+    const foundRoute = routesList.find((item) => item.isActive === false);
+
+    console.log("Line 42 foundRoute", foundRoute);
+
+    if (foundRoute) {
+      UUID = foundRoute.id;
+    } else {
+      UUID = self.crypto.randomUUID();
+    }
+
+    const modifiedRouteObject = {
       id: UUID,
       name: location.pathname,
       isActive: true,
@@ -37,7 +51,24 @@ function App() {
 
     if (!sessionStorage.getItem("UUID")) {
       sessionStorage.setItem("UUID", UUID);
-      await addRoute(newRoute);
+      foundRoute
+        ? await updateRoute(modifiedRouteObject)
+        : await addRoute(modifiedRouteObject);
+
+      const TabLists = await getAllRoutes();
+      TabLists.filter((item) => item.isActive === false).forEach((item) => {
+        const newWindow = window.open(item.name, "_blank");
+
+        // Check if the window opened successfully (not blocked by the browser)
+        if (newWindow) {
+          // Once the new window is loaded, assign data to its sessionStorage
+          newWindow.onload = function () {
+            newWindow.sessionStorage.setItem("UUID", item.id);
+          };
+        } else {
+          console.log("The new window was blocked by the browser.");
+        }
+      });
     }
   };
 
@@ -62,18 +93,33 @@ function App() {
         const sessionData = sessionStorage.getItem("UUID");
         const objValue = await getRoute(sessionData);
         objValue.name = location.pathname;
+        objValue.isActive = true;
         await partialUpdateRoute(objValue);
       }
     };
 
     // Make route inactive if Tab is closed.
+    /**
+     * The function `handleIsActive` retrieves a UUID from local storage, updates the `isActive` and
+     * `master` properties of an object fetched using the UUID, and then performs a partial update on
+     * the object.
+     */
     const handleIsActive = async () => {
       // getting the UUID from the local storage.
       const sessionData = sessionStorage.getItem("UUID");
       const objValue = await getRoute(sessionData);
       objValue.isActive = false;
-
+      objValue.master = false;
       await partialUpdateRoute(objValue);
+
+      // if master page is closed then this functionality will make another one page master
+      const allRoutes = await getAllRoutes();
+      const activepages = allRoutes.filter((item) => item.isActive === true);
+      if (activepages.length > 0) {
+        let masterPage = activepages[0];
+        masterPage.master = true;
+        await partialUpdateRoute(masterPage);
+      }
     };
 
     handleChangeRoute();
