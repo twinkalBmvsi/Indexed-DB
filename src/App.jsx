@@ -11,6 +11,7 @@ import {
   addRoute,
   updateRoute,
   getRoute,
+  getAllRoutes,
   partialUpdateRoute,
 } from "./utils/indexedDB";
 
@@ -19,13 +20,19 @@ function App() {
   const didRun = useRef(false);
 
   // Callback for Storing the data to sessionStorage;
+  const handleGetMaster = async () => {
+    const allRoutesDatas = await getAllRoutes();
+    const isMaster = allRoutesDatas.some((item) => item.master === true);
+    return isMaster ? false : true;
+  };
+
   const handleGetRoute = async () => {
     let UUID = self.crypto.randomUUID();
     const newRoute = {
       id: UUID,
       name: location.pathname,
       isActive: true,
-      master: true,
+      master: await handleGetMaster(),
     };
 
     if (!sessionStorage.getItem("UUID")) {
@@ -34,6 +41,7 @@ function App() {
     }
   };
 
+  // Responsible to Add route and it's detail to Indexed DB and make isActive false if existing tab closed.
   useEffect(() => {
     if (!didRun.current) {
       handleGetRoute();
@@ -46,19 +54,15 @@ function App() {
   }, []);
 
   // Triggers when route changes, it is responsible to change the routes of the exixting tab id.
-
   useEffect(() => {
     const handleChangeRoute = async () => {
       const sessionData = sessionStorage.getItem("UUID");
 
       if (sessionData) {
-        const updatedRouteValues = {
-          id: sessionData,
-          name: location.pathname,
-          isActive: true,
-          master: true,
-        };
-        await updateRoute(updatedRouteValues);
+        const sessionData = sessionStorage.getItem("UUID");
+        const objValue = await getRoute(sessionData);
+        objValue.name = location.pathname;
+        await partialUpdateRoute(objValue);
       }
     };
 
@@ -66,20 +70,19 @@ function App() {
     const handleIsActive = async () => {
       // getting the UUID from the local storage.
       const sessionData = sessionStorage.getItem("UUID");
+      const objValue = await getRoute(sessionData);
+      objValue.isActive = false;
 
-      // Update the existing route from isActive = true to isActive = false when the tab is closed.
-      const updatedRouteValues = {
-        name: location.pathname,
-        isActive: false,
-        master: true,
-      };
-      await partialUpdateRoute(sessionData, updatedRouteValues);
+      await partialUpdateRoute(objValue);
     };
 
     handleChangeRoute();
 
+    window.addEventListener("beforeunload", handleIsActive);
+
     return () => {
       console.log("Closing...");
+
       window.removeEventListener("beforeunload", handleIsActive);
     };
   }, [location.pathname]);
