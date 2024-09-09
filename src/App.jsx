@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Mainmenu from "./components/Mainmenu";
 import Appointment from "./routes/Appointment";
@@ -14,10 +14,12 @@ import {
   getAllRoutes,
   partialUpdateRoute,
 } from "./utils/indexedDB";
+import DialogBox from "./components/DialogBox";
 
 function App() {
   const location = useLocation();
   const didRun = useRef(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
   // Callback for Storing the data to sessionStorage;
   const handleGetMaster = async () => {
@@ -55,20 +57,17 @@ function App() {
         ? await updateRoute(modifiedRouteObject)
         : await addRoute(modifiedRouteObject);
 
+      /**
+       *
+       * for checking if there is tabs which is not opened then an alert will display and on
+       * accept, the inactive tabs will open.
+       *
+       */
       const TabLists = await getAllRoutes();
-      TabLists.filter((item) => item.isActive === false).forEach((item) => {
-        const newWindow = window.open(item.name, "_blank");
-
-        // Check if the window opened successfully (not blocked by the browser)
-        if (newWindow) {
-          // Once the new window is loaded, assign data to its sessionStorage
-          newWindow.onload = function () {
-            newWindow.sessionStorage.setItem("UUID", item.id);
-          };
-        } else {
-          console.log("The new window was blocked by the browser.");
-        }
-      });
+      const isTabs = TabLists.some((item) => item.isActive === false);
+      if (isTabs) {
+        setOpenDialog(true);
+      }
     }
   };
 
@@ -98,8 +97,9 @@ function App() {
       }
     };
 
-    // Make route inactive if Tab is closed.
     /**
+     * @Make route inactive if Tab is closed.
+     *
      * The function `handleIsActive` retrieves a UUID from local storage, updates the `isActive` and
      * `master` properties of an object fetched using the UUID, and then performs a partial update on
      * the object.
@@ -133,6 +133,26 @@ function App() {
     };
   }, [location.pathname]);
 
+  const handleOpenTabs = async (data) => {
+    setOpenDialog(false);
+    if (data) {
+      const TabLists = await getAllRoutes();
+      TabLists.filter((item) => item.isActive === false).forEach((item) => {
+        const newWindow = window.open(item.name, "_blank");
+
+        // Check if the window opened successfully (not blocked by the browser)
+        if (newWindow) {
+          // Once the new window is loaded, assign data to its sessionStorage
+          newWindow.onload = function () {
+            newWindow.sessionStorage.setItem("UUID", item.id);
+          };
+        } else {
+          console.log("The new window was blocked by the browser.");
+        }
+      });
+    }
+  };
+
   return (
     <div>
       <Mainmenu />
@@ -143,6 +163,8 @@ function App() {
         <Route path="/treat" element={<Treat />} />
         <Route path="/consult" element={<Consult />} />
       </Routes>
+
+      <DialogBox open={openDialog} handleAction={handleOpenTabs} />
     </div>
   );
 }
