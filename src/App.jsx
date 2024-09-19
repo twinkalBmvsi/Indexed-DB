@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, Suspense, lazy, useState } from "react";
 import "./App.css";
-import Mainmenu from "./components/Mainmenu";
-import Appointment from "./routes/Appointment";
-import Ask from "./routes/Ask";
-import Test from "./routes/Test";
-import Treat from "./routes/Treat";
-import Consult from "./routes/Consult";
+const Mainmenu = lazy(() => import("./components/Mainmenu"));
+const Ask = lazy(() => import("./routes/Ask"));
+const Test = lazy(() => import("./routes/Test"));
+const Treat = lazy(() => import("./routes/Treat"));
+const Consult = lazy(() => import("./routes/Consult"));
+const Appointment = lazy(() => import("./routes/Appointment"));
+
 import { Routes, Route, useLocation } from "react-router-dom";
 import {
   addRoute,
@@ -157,11 +158,46 @@ function App() {
     <div>
       <Mainmenu />
       <Routes>
-        <Route path="/" element={<Appointment />} />
-        <Route path="/ask" element={<Ask />} />
-        <Route path="/test" element={<Test />} />
-        <Route path="/treat" element={<Treat />} />
-        <Route path="/consult" element={<Consult />} />
+        <Route
+          path="/"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Appointment />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/ask"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Ask />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/test"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Test />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/treat"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Treat />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/consult"
+          element={
+            <Suspense fallback={<div>Loading...</div>}>
+              <Consult />
+            </Suspense>
+          }
+        />
       </Routes>
 
       <DialogBox open={openDialog} handleAction={handleOpenTabs} />
