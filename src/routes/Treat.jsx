@@ -1,7 +1,11 @@
 import React from "react";
 
 const Treat = () => {
-  return <div>Treat</div>;
+  return (
+    <div>
+      <h1>Treat</h1>
+    </div>
+  );
 };
 
 export default Treat;

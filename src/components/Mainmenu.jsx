@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const menuButtons = [
   {
@@ -32,6 +32,7 @@ const menuButtons = [
 
 const Mainmenu = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNavigate = (route) => {
     navigate(route);
@@ -41,19 +42,30 @@ const Mainmenu = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, textAlign: "left" }}
+          >
             Virgie
           </Typography>
           <Stack spacing={1} direction="row">
             {menuButtons?.map((item, index) => {
               return (
-                <Button
-                  key={index}
-                  onClick={() => handleNavigate(item.route)}
-                  color="inherit"
+                <div
+                  style={{
+                    borderBottom:
+                      location.pathname === item.route && "2px solid white",
+                  }}
                 >
-                  {item.name}
-                </Button>
+                  <Button
+                    key={index}
+                    onClick={() => handleNavigate(item.route)}
+                    color="inherit"
+                  >
+                    {item.name}
+                  </Button>
+                </div>
               );
             })}
           </Stack>
