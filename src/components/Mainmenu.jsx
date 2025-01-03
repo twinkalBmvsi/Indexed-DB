@@ -30,11 +30,13 @@ const menuButtons = [
   },
 ];
 
-const Mainmenu = () => {
+const Mainmenu = (props) => {
+  const { handleClick } = props;
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleNavigate = (route) => {
+    handleClick(route);
     navigate(route);
   };
 
